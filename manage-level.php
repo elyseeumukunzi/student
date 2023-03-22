@@ -9,12 +9,12 @@ if (strlen($_SESSION['sturecmsaid']==0)) {
 if(isset($_GET['delid']))
 {
 $rid=intval($_GET['delid']);
-$sql="delete from tblclass where ID=:rid";
+$sql="delete from tbllevels where id=:rid";
 $query=$dbh->prepare($sql);
 $query->bindParam(':rid',$rid,PDO::PARAM_STR);
 $query->execute();
- echo "<script>alert('Data deleted');</script>"; 
-  echo "<script>window.location.href = 'manage-class.php'</script>";     
+ echo "<script>alert('Level deleted');</script>"; 
+  echo "<script>window.location.href = 'manage-level.php'</script>";     
 
 
 }
@@ -30,11 +30,11 @@ $query->execute();
         <div class="main-panel">
           <div class="content-wrapper">
              <div class="page-header">
-              <h3 class="page-title"> Manage Class </h3>
+              <h3 class="page-title"> Manage Levels </h3>
               <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                   <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
-                  <li class="breadcrumb-item active" aria-current="page"> Manage Class</li>
+                  <li class="breadcrumb-item active" aria-current="page"> Manage Levels</li>
                 </ol>
               </nav>
             </div>
@@ -43,17 +43,16 @@ $query->execute();
                 <div class="card">
                   <div class="card-body">
                     <div class="d-sm-flex align-items-center mb-4">
-                      <h4 class="card-title mb-sm-0">Manage Class</h4>
-                      <a href="#" class="text-dark ml-auto mb-3 mb-sm-0"> View all Classes</a>
+                      <h4 class="card-title mb-sm-0">Manage Levels</h4>
+                      <a href="#" class="text-dark ml-auto mb-3 mb-sm-0"> View all Levels</a>
                     </div>
                     <div class="table-responsive border rounded p-1">
                       <table class="table">
                         <thead>
                           <tr>
                             <th class="font-weight-bold">S.No</th>
-                            <th class="font-weight-bold">Class Name</th>
-                            <th class="font-weight-bold">Section</th>
-                            <th class="font-weight-bold">Level</th>
+                            <th class="font-weight-bold">Level Name</th>
+                            <th class="font-weight-bold">Description</th>
                             <th class="font-weight-bold">Creation Date</th>
                             <th class="font-weight-bold">Action</th>
                             
@@ -69,13 +68,9 @@ $query->execute();
         // Formula for pagination
         $no_of_records_per_page =15;
         $offset = ($pageno-1) * $no_of_records_per_page;
-       $ret = "SELECT ID FROM tblclass";
-$query1 = $dbh -> prepare($ret);
-$query1->execute();
-$results1=$query1->fetchAll(PDO::FETCH_OBJ);
-$total_rows=$query1->rowCount();
+     
 $total_pages = ceil($total_rows / $no_of_records_per_page);
-$sql="SELECT * from tblclass,tbllevels WHERE tblclass.LevelId = tbllevels.id LIMIT $offset, $no_of_records_per_page";
+$sql="SELECT * from tbllevels LIMIT $offset, $no_of_records_per_page";
 $query = $dbh -> prepare($sql);
 $query->execute();
 $results=$query->fetchAll(PDO::FETCH_OBJ);
@@ -88,13 +83,12 @@ foreach($results as $row)
                           <tr>
                            
                             <td><?php echo htmlentities($cnt);?></td>
-                            <td><?php  echo htmlentities($row->ClassName);?></td>
-                            <td><?php  echo htmlentities($row->Section);?></td>
                             <td><?php  echo htmlentities($row->levelname);?></td>
-                            <td><?php  echo htmlentities($row->CreationDate);?></td>
+                            <td><?php  echo htmlentities($row->description);?></td>
+                            <td><?php  echo htmlentities($row->createdDates);?></td>
                             <td>
-                              <a href="edit-class-detail.php?editid=<?php echo htmlentities ($row->ID);?>" class="btn btn-primary btn-sm"><i class="icon-eye"></i></a>
-                                               <a href="manage-class.php?delid=<?php echo ($row->ID);?>" onclick="return confirm('Do you really want to Delete ?');" class="btn btn-danger btn-sm"> <i class="icon-trash"></i></a>
+                              <a href="edit-class-detail.php?editid=<?php echo htmlentities ($row->id);?>" class="btn btn-primary btn-sm"><i class="icon-eye"></i></a>
+                                               <a href="manage-level.php?delid=<?php echo ($row->id);?>" onclick="return confirm('Do you really want to Delete ?');" class="btn btn-danger btn-sm"> <i class="icon-trash"></i></a>
                             </td> 
                           </tr><?php $cnt=$cnt+1;}} ?>
                         </tbody>
