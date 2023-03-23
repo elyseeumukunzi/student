@@ -65,22 +65,47 @@
         <i class="icon-people menu-icon"></i>
         <span class="menu-title">Students</span>
       </a>
+      <?php 
+      $thisyear=date('Y');
+       $sql = "SELECT id from tblyears WHERE year=:year";
+       $query = $dbh->prepare($sql);
+       $query->bindParam(':year', $thisyear, PDO::PARAM_STR);
+       $query->execute();
+       $results = $query->fetchAll(PDO::FETCH_OBJ);       
+       if ($query->rowCount() > 0) {
+         foreach ($results as $row) { 
+          $year=$row->id;
+
+         }}
+         
+         $sql = "SELECT id from tblterms WHERE yearid=:year ";
+         $query = $dbh->prepare($sql);
+         $query->bindParam(':year', $year, PDO::PARAM_STR);
+         $query->execute();
+         $results = $query->fetchAll(PDO::FETCH_OBJ);       
+         if ($query->rowCount() > 0) {
+           foreach ($results as $row) { 
+            $term=$row->id;
+  
+           }}
+          ?>     
+
       <div class="collapse" id="ui-basic1">
         <ul class="nav flex-column sub-menu">
           <li class="nav-item"> <a class="nav-link" href="add-students.php">Add Students</a></li>
-          <li class="nav-item"> <a class="nav-link" href="manage-students.php">Manage Students</a></li>
+          <li class="nav-item"> <a class="nav-link" href="manage-students.php?year=<?php echo $year; ?>&term=<?php echo $term; ?>&level=1">Manage Students</a></li>
         </ul>
       </div>
     </li>
     <li class="nav-item">
       <a class="nav-link" data-toggle="collapse" href="#ui-basic8" aria-expanded="false" aria-controls="ui-basic1">
-        <i class="icon-people menu-icon"></i>
+        <i class="icon-event menu-icon"></i>
         <span class="menu-title">Terms</span>
       </a>
       <div class="collapse" id="ui-basic8">
         <ul class="nav flex-column sub-menu">
           <li class="nav-item"> <a class="nav-link" href="add-term.php">Add Term</a></li>
-          <li class="nav-item"> <a class="nav-link" href="manage-term.php">Manage Terms</a></li>
+          <li class="nav-item"> <a class="nav-link" href="manage-terms.php">Manage Terms</a></li>
         </ul>
       </div>
     </li>
@@ -130,6 +155,12 @@
         <span class="menu-title">Reports</span>
       </a>
     </li>
+    <li class="nav-item">
+              <a class="nav-link" href="search.php">
+                <i class="icon-magnifier menu-icon"></i>
+                <span class="menu-title">Search</span>
+              </a>
+            </li>
    
     </li>
   </ul>

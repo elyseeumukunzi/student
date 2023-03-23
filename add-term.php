@@ -16,29 +16,28 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
     if ($query->rowCount() > 0) {
       echo '<script>alert("This year exist already")</script>';
 
-    }
-    else{
-    $sql = "insert into tblyears(year,description)values(:year,:description)";
-    $query = $dbh->prepare($sql);
-    $query->bindParam(':year', $year, PDO::PARAM_STR);
-    $query->bindParam(':description', $description, PDO::PARAM_STR);
-
-    $query->execute();
-    $LastInsertId = $dbh->lastInsertId();
-    if ($LastInsertId > 0) {
-      echo '<script>alert("new academic year has been added.")</script>';
-      echo "<script>window.location.href ='add-term.php'</script>";
     } else {
-      echo '<script>alert("Something Went Wrong. Please try again")</script>';
+      $sql = "insert into tblyears(year,description)values(:year,:description)";
+      $query = $dbh->prepare($sql);
+      $query->bindParam(':year', $year, PDO::PARAM_STR);
+      $query->bindParam(':description', $description, PDO::PARAM_STR);
+
+      $query->execute();
+      $LastInsertId = $dbh->lastInsertId();
+      if ($LastInsertId > 0) {
+        echo '<script>alert("new academic year has been added.")</script>';
+        echo "<script>window.location.href ='add-term.php'</script>";
+      } else {
+        echo '<script>alert("Something Went Wrong. Please try again")</script>';
+      }
     }
-  }
   }
 
   if (isset($_POST['saveterm'])) {
     $year = $_POST['year'];
-    $term=$_POST['term'];
-    $fromdate=$_POST['fromdate'];
-    $todate=$_POST['todate'];
+    $term = $_POST['term'];
+    $fromdate = $_POST['fromdate'];
+    $todate = $_POST['todate'];
     $selectcurrent = "SELECT id FROM tblterms WHERE yearid=:year AND term=:term";
     $query = $dbh->prepare($selectcurrent);
     $query->bindParam(':year', $year, PDO::PARAM_STR);
@@ -48,23 +47,51 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
     if ($query->rowCount() > 0) {
       echo '<script>alert("This term already exist")</script>';
 
-    }
-    else{
-    $sql = "insert into tblterms(term,fromdates,todates,yearid)values(:term,:fromdate,:todate,:year)";
-    $query = $dbh->prepare($sql);
-    $query->bindParam(':term', $term, PDO::PARAM_STR);
-    $query->bindParam(':fromdate', $fromdate, PDO::PARAM_STR);
-    $query->bindParam(':todate', $todate, PDO::PARAM_STR);    
-    $query->bindParam(':year', $year, PDO::PARAM_STR);
-    $query->execute();
-    $LastInsertId = $dbh->lastInsertId();
-    if ($LastInsertId > 0) {
-      echo '<script>alert("new term have been added.")</script>';
-      echo "<script>window.location.href ='add-term.php'</script>";
     } else {
-      echo '<script>alert("Something Went Wrong. Please try again")</script>';
+      $sql = "insert into tblterms(term,fromdates,todates,yearid)values(:term,:fromdate,:todate,:year)";
+      $query = $dbh->prepare($sql);
+      $query->bindParam(':term', $term, PDO::PARAM_STR);
+      $query->bindParam(':fromdate', $fromdate, PDO::PARAM_STR);
+      $query->bindParam(':todate', $todate, PDO::PARAM_STR);
+      $query->bindParam(':year', $year, PDO::PARAM_STR);
+      $query->execute();
+      $LastInsertId = $dbh->lastInsertId();
+      $termid=$LastInsertId;
+      
+      if ($LastInsertId > 0) {
+        $students = "SELECT ID FROM tblstudent";
+        $query = $dbh->prepare($students);
+        $query->execute();
+        $results2 = $query->fetchAll(PDO::FETCH_OBJ);
+                    
+          foreach($results2 as $row) {
+            echo $termid;            
+            $studentid =$row->ID;           
+            $marks = 100;
+            $addconducts = "insert into tblsconducts(marks,termid,studentid)values(:marks,:termid,:studentid)";            
+            $query2 = $dbh->prepare($addconducts);
+            $query2->bindParam(':marks', $marks, PDO::PARAM_STR);
+            $query2->bindParam(':termid', $termid, PDO::PARAM_STR);
+            $query2->bindParam(':studentid', $studentid, PDO::PARAM_STR);
+            $query2->execute();
+            
+          }
+          if($query2 == 1)
+          {
+            echo '<script>alert("oops something went wrong.")</script>';
+          }
+          else
+          {
+            // echo '<script>alert("new term have been added.")</script>';
+          }
+            // echo '<script>alert("new term have been added.")</script>';
+            // echo "<script>window.location.href ='add-term.php'</script>";
+          
+        
+      } else {
+        echo '<script>alert("Something Went Wrong. Please try again")</script>';
+      }
     }
-  }
 
   }
   ?>
@@ -78,6 +105,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
     <div class="main-panel">
       <div class="content-wrapper">
         <div class="page-header">
+      
           <h3 class="page-title">Create new term </h3>
           <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
@@ -143,7 +171,8 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
 
                     <div class="form-group col-md-4">
                       <label for="exampleInputName1">Description:</label>
-                      <input type="text" class="form-control" id="description" name="description" value="" required='true'>
+                      <input type="text" class="form-control" id="description" name="description" value=""
+                        required='true'>
 
                     </div>
                   </div>
@@ -196,13 +225,13 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                     </select>
                   </div>
                   <div class="form-group">
-                        <label for="exampleInputName1">From Date:</label>
-                        <input type="date" class="form-control" id="fromdate" name="fromdate" value="" required='true'>
-                      </div>
-                     <div class="form-group">
-                        <label for="exampleInputName1">To Date:</label>
-                        <input type="date" class="form-control" id="todate" name="todate" value="" required='true'>
-                      </div>
+                    <label for="exampleInputName1">From Date:</label>
+                    <input type="date" class="form-control" id="fromdate" name="fromdate" value="" required='true'>
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleInputName1">To Date:</label>
+                    <input type="date" class="form-control" id="todate" name="todate" value="" required='true'>
+                  </div>
                   <button type="submit" class="btn btn-primary mr-2" name="saveterm">Submit</button>
 
                 </form>
