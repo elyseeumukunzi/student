@@ -116,6 +116,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                     <div class="report-inner-card color-1">
                                                         <div class="inner-card-text text-white">
                                                             <?php
+                                                            //selecting total student marks in his term
                                                             $sql1 = "SELECT marks from tblsconducts WHERE studentid=:studentid AND termid=:termid";
                                                             $query1 = $dbh->prepare($sql1);
                                                             $query1->bindParam(':studentid', $studentid, PDO::PARAM_STR);
