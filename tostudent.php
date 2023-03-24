@@ -7,43 +7,53 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
 } else {
 
     if (isset($_POST['punish'])) {
-        $studentid = isset($_GET['studentid']);        
-        $thisyear=date('Y');
-         $sql = "SELECT id from tblyears WHERE year=:year";
-         $query = $dbh->prepare($sql);
-         $query->bindParam(':year', $thisyear, PDO::PARAM_STR);
-         $query->execute();
-         $results = $query->fetchAll(PDO::FETCH_OBJ);       
-         if ($query->rowCount() > 0) {
-           foreach ($results as $row) { 
-            $year=$row->id;
-  
-           }}           
-           $sql = "SELECT tblsconducts.marks,tblsconducts.id from tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.yearid=:year";
-           $query = $dbh->prepare($sql);
-           $query->bindParam(':year', $year, PDO::PARAM_STR);
-           $query->execute();
-           $results = $query->fetchAll(PDO::FETCH_OBJ);       
-           if ($query->rowCount() > 0) {
-             foreach ($results as $row) { 
-              $conduct=$row->id;
-    
-             }}             
+        $studentid = $_GET['studentid'];
+        $thisyear = date('Y');
+        $sql = "SELECT id from tblyears WHERE year=:year";
+        $query = $dbh->prepare($sql);
+        $query->bindParam(':year', $thisyear, PDO::PARAM_STR);
+        $query->execute();
+        $results = $query->fetchAll(PDO::FETCH_OBJ);
+        if ($query->rowCount() > 0) {
+            foreach ($results as $row) {
+                $year = $row->id;
+
+            }
+        }
+        $sql = "SELECT tblsconducts.marks,tblsconducts.id,tblterms.termid from tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.yearid=:year AND tblsconducts.studentid=:studentid";
+        $query = $dbh->prepare($sql);
+        $query->bindParam(':year', $year, PDO::PARAM_STR);
+        $query->bindParam(':studentid', $studentid, PDO::PARAM_STR);
+
+        $query->execute();
+        $results = $query->fetchAll(PDO::FETCH_OBJ);
+        if ($query->rowCount() > 0) {
+            foreach ($results as $row) {
+                $conductid = $row->id;
+                $termid = $row->termid;
+            }
+        }
         $fault = $_POST['fault'];
         $marks = $_POST['marks'];
-        $newmarks=$row->marks - $marks;
+        $newmarks = $row->marks - $marks;
         $description = $_POST['description'];
-        $userid= $_SESSION['sturecmsaid'];        
+        $userid = $_SESSION['sturecmsaid'];
         $sql = "insert into tblpunishments(fault,description,marks,conductid,userid)values(:fault,:description,:marks,:conductid,:userid)";
         $query = $dbh->prepare($sql);
         $query->bindParam(':fault', $fault, PDO::PARAM_STR);
         $query->bindParam(':description', $description, PDO::PARAM_STR);
         $query->bindParam(':marks', $marks, PDO::PARAM_STR);
-        $query->bindParam(':conductid', $conduct, PDO::PARAM_STR);
+        $query->bindParam(':conductid', $conductid, PDO::PARAM_STR);
         $query->bindParam(':userid', $userid, PDO::PARAM_STR);
         $query->execute();
         $LastInsertId = $dbh->lastInsertId();
         if ($LastInsertId > 0) {
+            $update = "UPDATE tblsconducts SET marks=:newmarks WHERE id=:conductid";
+            $queryupdate = $dbh->prepare($update);
+            $queryupdate->bindParam(':newmarks', $newmarks, PDO::PARAM_STR);
+            $queryupdate->bindParam(':conductid', $conductid, PDO::PARAM_STR);
+
+            $queryupdate->execute();
             echo '<script>alert("Punishmen added")</script>';
             echo "<script>window.location.href ='tostudent.php?studentid=$studentid'</script>";
         } else {
@@ -51,11 +61,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
         }
     }
 
-    ?><!--  Orginal Author Name: Mayuri K. 
- for any PHP, Codeignitor, Laravel OR Python work contact me at mayuri.infospace@gmail.com  
- Visit website : www.mayurik.com -->
-
-    <!-- partial:partials/_navbar.html -->
+    ?>
     <?php include_once('includes/header.php'); ?>
     <!-- partial -->
     <div class="container-fluid page-body-wrapper">
@@ -72,6 +78,18 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                     <div class="col-md-12">
                                         <div class="d-sm-flex align-items-baseline report-summary-header">
                                             <?php
+                                             $sql = "SELECT tblsconducts.marks,tblsconducts.id,tblsconducts.termid FROM tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.yearid=:year AND tblsconducts.studentid=:studentid";
+                                             $query = $dbh->prepare($sql);
+                                             $query->bindParam(':year', $year, PDO::PARAM_STR);
+                                             $query->bindParam(':studentid', $studentid, PDO::PARAM_STR);                                     
+                                             $query->execute();
+                                             $results = $query->fetchAll(PDO::FETCH_OBJ);
+                                             if ($query->rowCount() > 0) {
+                                                 foreach ($results as $row) {
+                                                    $conductid = $row->id;
+                                                     $termid = $row->termid;
+                                                 }
+                                             }
                                             if (isset($_GET['studentid'])) {
                                                 $studentid = $_GET['studentid'];
                                                 $sql = "SELECT * FROM tblstudent,tbllevels,tblclass WHERE tblstudent.StudentClass = tblclass.ID AND tblclass.LevelId = tbllevels.id  AND tblstudent.ID=:studentid";
@@ -98,15 +116,21 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                     <div class="report-inner-card color-1">
                                                         <div class="inner-card-text text-white">
                                                             <?php
-                                                            $sql1 = "SELECT * from  tblclass";
+                                                            $sql1 = "SELECT marks from tblsconducts WHERE studentid=:studentid AND termid=:termid";
                                                             $query1 = $dbh->prepare($sql1);
+                                                            $query1->bindParam(':studentid', $studentid, PDO::PARAM_STR);
+                                                            $query1->bindParam(':termid', $termid, PDO::PARAM_STR);
                                                             $query1->execute();
                                                             $results1 = $query1->fetchAll(PDO::FETCH_OBJ);
-                                                            $totclass = $query1->rowCount();
+                                                            $totalmarks = 0;
+                                                            foreach ($results1 as $row) {
+                                                                $totalmarks = $row->marks; 
+                                                              
+                                                            }
                                                             ?>
                                                             <span class="report-title">Total Marks this term</span>
                                                             <h4>
-                                                                <?php echo htmlentities($totclass); ?>
+                                                                <?php echo htmlentities($conductid); ?>
                                                             </h4>
                                                             <a href="manage-class.php"><span class="report-count"> View
                                                                     marks</span></a>
@@ -119,16 +143,18 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                 <div class="col-md-6 report-inner-cards-wrapper">
                                                     <div class="report-inner-card color-2">
                                                         <div class="inner-card-text text-white">
-                                                            <?php
-                                                            $sql2 = "SELECT * from  tblstudent";
+                                                            <?php                                                           
+                                                            
+                                                            $sql2 = "SELECT * FROM tblpunishments WHERE tblpunishments.conductid=:conductid";
                                                             $query2 = $dbh->prepare($sql2);
+                                                            $query2->bindParam(':conductid', $conductid, PDO::PARAM_STR);
                                                             $query2->execute();
                                                             $results2 = $query2->fetchAll(PDO::FETCH_OBJ);
                                                             $totstu = $query2->rowCount();
                                                             ?>
                                                             <span class="report-title">Total Punishments</span>
                                                             <h4>
-                                                                <?php echo htmlentities($totstu); ?>
+                                                                <?php echo htmlentities($conductid) ; ?>
                                                             </h4>
                                                             <a href="manage-students.php"><span class="report-count"> View
                                                                     punishments</span></a>
