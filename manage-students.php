@@ -205,28 +205,26 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                             <td>
                               <?php echo htmlentities($row->StudentName); ?>
                             </td>
-                            <td>
-                              <?php
-                              if (htmlentities($row->marks) <= 49) {
-                                ?>
+
+                            <?php
+                            if (htmlentities($row->marks) <= 49) {
+                              ?>
                               <td style="background:red; color:white">
                                 <?php echo htmlentities($row->marks); ?>
                               </td>
                               <?php
-                              } elseif (htmlentities($row->marks) <= 69) {
-                                ?>
+                            } elseif (htmlentities($row->marks) <= 69) {
+                              ?>
                               <td style="background:skyblue; color:white">
 
                                 <?php echo htmlentities($row->marks); ?>
                               </td>
                               <?php
-                              } elseif (htmlentities($row->marks) >= 70) {
-                                ?>
+                            } elseif (htmlentities($row->marks) >= 70) {
+                              ?>
                               <td>
-
                                 <?php echo htmlentities($row->marks);
-                              } ?>
-                            </td>
+                            } ?>
                             </td>
                             <td>
                               <a href="tostudent.php?studentid=<?php echo htmlentities($row->ID) ?>"
@@ -263,8 +261,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                               </td>
                               <td>
                                 <?php echo htmlentities($row->StudentName); ?>
-                              </td>
-                              <td>
+                              </td>                              
                                 <?php
                                 if (htmlentities($row->marks) <= 49) {
                                   ?>
@@ -283,13 +280,11 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                   ?>
                                 <td>
 
-                                  <?php echo htmlentities($row->marks);
+                                  <?php echo htmlentities($row->marks); ?>
+                                  <?php 
                                 } ?>
                               </td>
-                              </td>
-                              <td>
-                                <?php echo htmlentities($row->marks); ?>
-                              </td>
+                                                          
                               <td>
                                 <a href="tostudent.php?studentid=<?php echo htmlentities($row->ID) ?>"
                                   class="btn btn-primary btn-sm"><i class="icon-drawer"></i></a>

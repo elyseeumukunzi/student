@@ -63,9 +63,7 @@ $query->execute();
                            if (isset($_GET['pageno'])) {
             $pageno = $_GET['pageno'];
         } else {
-            $pageno = 1;
-        }
-        // Formula for pagination
+            $pageno = 1;ula for pagination
         $no_of_records_per_page =15;
         $offset = ($pageno-1) * $no_of_records_per_page;
      

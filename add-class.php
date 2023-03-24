@@ -9,8 +9,6 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
     $cname = $_POST['cname'];
     $section = $_POST['section'];
     $levelid = $_POST['levelid'];
-
-
     $sql = "insert into tblclass(ClassName,Section,LevelId)values(:cname,:section,:levelid)";
     $query = $dbh->prepare($sql);
     $query->bindParam(':cname', $cname, PDO::PARAM_STR);
