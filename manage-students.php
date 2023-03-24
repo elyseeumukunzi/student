@@ -286,6 +286,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                               </td>
                                                           
                               <td>
+                                <!--remember to send the term id by default to sign conducts
                                 <a href="tostudent.php?studentid=<?php echo htmlentities($row->ID) ?>"
                                   class="btn btn-primary btn-sm"><i class="icon-drawer"></i></a>
                                 <a href="edit-student-detail.php?editid=<?php echo htmlentities($row->ID); ?>"

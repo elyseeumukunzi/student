@@ -78,18 +78,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                     <div class="col-md-12">
                                         <div class="d-sm-flex align-items-baseline report-summary-header">
                                             <?php
-                                             $sql = "SELECT tblsconducts.marks,tblsconducts.id,tblsconducts.termid FROM tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.yearid=:year AND tblsconducts.studentid=:studentid";
-                                             $query = $dbh->prepare($sql);
-                                             $query->bindParam(':year', $year, PDO::PARAM_STR);
-                                             $query->bindParam(':studentid', $studentid, PDO::PARAM_STR);                                     
-                                             $query->execute();
-                                             $results = $query->fetchAll(PDO::FETCH_OBJ);
-                                             if ($query->rowCount() > 0) {
-                                                 foreach ($results as $row) {
-                                                    $conductid = $row->id;
-                                                     $termid = $row->termid;
-                                                 }
-                                             }
+                                            
                                             if (isset($_GET['studentid'])) {
                                                 $studentid = $_GET['studentid'];
                                                 $sql = "SELECT * FROM tblstudent,tbllevels,tblclass WHERE tblstudent.StudentClass = tblclass.ID AND tblclass.LevelId = tbllevels.id  AND tblstudent.ID=:studentid";
@@ -117,6 +106,18 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                         <div class="inner-card-text text-white">
                                                             <?php
                                                             //selecting total student marks in his term
+                                                            $sql = "SELECT tblsconducts.marks,tblsconducts.id,tblsconducts.termid FROM tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.yearid=:year AND tblsconducts.studentid=:studentid";
+                                                            $query = $dbh->prepare($sql);
+                                                            $query->bindParam(':year', $year, PDO::PARAM_STR);
+                                                            $query->bindParam(':studentid', $studentid, PDO::PARAM_STR);                                     
+                                                            $query->execute();
+                                                            $results = $query->fetchAll(PDO::FETCH_OBJ);
+                                                            if ($query->rowCount() > 0) {
+                                                                foreach ($results as $row) {
+                                                                   $conductid = $row->id;
+                                                                    $termid = $row->termid;
+                                                                }
+                                                            }
                                                             $sql1 = "SELECT marks from tblsconducts WHERE studentid=:studentid AND termid=:termid";
                                                             $query1 = $dbh->prepare($sql1);
                                                             $query1->bindParam(':studentid', $studentid, PDO::PARAM_STR);
@@ -131,7 +132,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                             ?>
                                                             <span class="report-title">Total Marks this term</span>
                                                             <h4>
-                                                                <?php echo htmlentities($conductid); ?>
+                                                                <?php echo htmlentities($totalmarks); ?>
                                                             </h4>
                                                             <a href="manage-class.php"><span class="report-count"> View
                                                                     marks</span></a>
@@ -155,7 +156,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                             ?>
                                                             <span class="report-title">Total Punishments</span>
                                                             <h4>
-                                                                <?php echo htmlentities($conductid) ; ?>
+                                                                <?php echo htmlentities($totstu) ; ?>
                                                             </h4>
                                                             <a href="manage-students.php"><span class="report-count"> View
                                                                     punishments</span></a>
@@ -169,7 +170,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
 
                                                 <div class="row" style="margin-top:20px">
                                                     <div class="col-md-6">
-                                                        <label>Punishments this term</label>
+                                                        <label><b>Punishments this term</b></label>
                                                     </div>
                                                     <div class="col-md-3">
                                                         <select name="term" value="" class="form-control" required='true'>
@@ -214,9 +215,10 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                         <tr>
                                                             <th class="font-weight-bold">No</th>
                                                             <th class="font-weight-bold">Mistake</th>
+                                                            <th class="font-weight-bold">Description</th>
                                                             <th class="font-weight-bold">Punishments</th>
+                                                            <th class="font-weight-bold">Dean</th>
                                                             <th class="font-weight-bold">Dates</th>
-                                                            <th class="font-weight-bold">Action</th>
 
                                                         </tr>
                                                     </thead>
@@ -231,8 +233,9 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                         $no_of_records_per_page = 15;
                                                         $offset = ($pageno - 1) * $no_of_records_per_page;
 
-                                                        $sql = "SELECT * from tbllevels LIMIT $offset, $no_of_records_per_page";
+                                                        $sql = "SELECT * from tblsconducts,tblpunishments,tbladmin WHERE tblsconducts.id=tblpunishments.conductid AND tbladmin.ID=tblpunishments.userid AND tblsconducts.id=:conductid";
                                                         $query = $dbh->prepare($sql);
+                                                        $query->bindParam(':conductid' ,$conductid, PDO::PARAM_STR);
                                                         $query->execute();
                                                         $results = $query->fetchAll(PDO::FETCH_OBJ);
 
@@ -245,20 +248,19 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                                         <?php echo htmlentities($cnt); ?>
                                                                     </td>
                                                                     <td>
-                                                                        <?php echo htmlentities($row->levelname); ?>
+                                                                        <?php echo htmlentities($row->fault); ?>
                                                                     </td>
                                                                     <td>
                                                                         <?php echo htmlentities($row->description); ?>
                                                                     </td>
                                                                     <td>
-                                                                        <?php echo htmlentities($row->createdDates); ?>
+                                                                        <?php echo "-".$row->marks . "Marks"; ?>
                                                                     </td>
                                                                     <td>
-                                                                        <a href="edit-class-detail.php?editid=<?php echo htmlentities($row->id); ?>"
-                                                                            class="btn btn-primary btn-sm"><i class="icon-eye"></i></a>
-                                                                        <a href="manage-level.php?delid=<?php echo ($row->id); ?>"
-                                                                            onclick="return confirm('Do you really want to Delete ?');"
-                                                                            class="btn btn-danger btn-sm"> <i class="icon-trash"></i></a>
+                                                                    <?php echo $row->AdminName. " role"; ?>                                                                       
+                                                                    </td>
+                                                                    <td>
+                                                                    <?php echo $row->dates; ?>                                                                       
                                                                     </td>
                                                                 </tr>
                                                                 <?php $cnt = $cnt + 1;
@@ -269,7 +271,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-8">
-                                                    <P>new punishment</P>
+                                                    <P><b>new punishment</b></P>
 
                                                     <form class="forms-sample" method="POST">
 
