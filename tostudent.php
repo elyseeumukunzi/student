@@ -78,7 +78,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                     <div class="col-md-12">
                                         <div class="d-sm-flex align-items-baseline report-summary-header">
                                             <?php
-                                            
+
                                             if (isset($_GET['studentid'])) {
                                                 $studentid = $_GET['studentid'];
                                                 $sql = "SELECT * FROM tblstudent,tbllevels,tblclass WHERE tblstudent.StudentClass = tblclass.ID AND tblclass.LevelId = tbllevels.id  AND tblstudent.ID=:studentid";
@@ -109,12 +109,12 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                             $sql = "SELECT tblsconducts.marks,tblsconducts.id,tblsconducts.termid FROM tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.yearid=:year AND tblsconducts.studentid=:studentid";
                                                             $query = $dbh->prepare($sql);
                                                             $query->bindParam(':year', $year, PDO::PARAM_STR);
-                                                            $query->bindParam(':studentid', $studentid, PDO::PARAM_STR);                                     
+                                                            $query->bindParam(':studentid', $studentid, PDO::PARAM_STR);
                                                             $query->execute();
                                                             $results = $query->fetchAll(PDO::FETCH_OBJ);
                                                             if ($query->rowCount() > 0) {
                                                                 foreach ($results as $row) {
-                                                                   $conductid = $row->id;
+                                                                    $conductid = $row->id;
                                                                     $termid = $row->termid;
                                                                 }
                                                             }
@@ -126,8 +126,8 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                             $results1 = $query1->fetchAll(PDO::FETCH_OBJ);
                                                             $totalmarks = 0;
                                                             foreach ($results1 as $row) {
-                                                                $totalmarks = $row->marks; 
-                                                              
+                                                                $totalmarks = $row->marks;
+
                                                             }
                                                             ?>
                                                             <span class="report-title">Total Marks this term</span>
@@ -145,8 +145,8 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                 <div class="col-md-6 report-inner-cards-wrapper">
                                                     <div class="report-inner-card color-2">
                                                         <div class="inner-card-text text-white">
-                                                            <?php                                                           
-                                                            
+                                                            <?php
+
                                                             $sql2 = "SELECT * FROM tblpunishments WHERE tblpunishments.conductid=:conductid";
                                                             $query2 = $dbh->prepare($sql2);
                                                             $query2->bindParam(':conductid', $conductid, PDO::PARAM_STR);
@@ -156,7 +156,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                             ?>
                                                             <span class="report-title">Total Punishments</span>
                                                             <h4>
-                                                                <?php echo htmlentities($totstu) ; ?>
+                                                                <?php echo htmlentities($totstu); ?>
                                                             </h4>
                                                             <a href="manage-students.php"><span class="report-count"> View
                                                                     punishments</span></a>
@@ -172,11 +172,11 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                     <div class="col-md-6">
                                                         <label><b>Punishments this term</b></label>
                                                     </div>
-                                                    <div class="col-md-3">
-                                                        <select name="term" value="" class="form-control" required='true'>
+                                                    <div class="col-md-6">
+                                                        <ul class="pagination">
                                                             <?php
                                                             $thisyear = date('Y');
-                                                            $sql = "SELECT tblterms.id,tblterms.term FROM tblterms,tblyears WHERE tblterms.yearid = tblyears.id AND tblyears.year =:thisyear ORDER BY tblterms.id DESC";
+                                                            $sql = "SELECT tblterms.id,tblterms.term FROM tblterms,tblyears WHERE tblterms.yearid = tblyears.id AND tblyears.year =:thisyear ORDER BY tblterms.id ASC";
                                                             $query = $dbh->prepare($sql);
                                                             $query->bindParam(':thisyear', $thisyear, PDO::PARAM_STR);
                                                             $query->execute();
@@ -184,27 +184,27 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                             if ($query->rowCount() > 0) {
                                                                 foreach ($results as $row) {
                                                                     ?>
-                                                                    <option value="<?php echo $row->term; ?>">
-                                                                        <?php $term = htmlentities($row->term);
-                                                                        if ($term == 1) {
-                                                                            echo $term . "st Term";
-                                                                        } elseif ($term == 2) {
-                                                                            echo $term . "nd Term";
-                                                                        } elseif ($term == 3) {
-                                                                            echo $term . "rd Term";
-                                                                        } else {
-                                                                            echo "error";
-                                                                        }
-                                                                        ?>
-                                                                    </option>
+                                                                    <li><a href="tostudent.php?studentid=<?php echo $studentid; ?>&showterm=<?php echo $row->id; ?>"><strong>
+                                                                                <?php $term = htmlentities($row->term);
+                                                                                if ($term == 1) {
+                                                                                    echo $term . "st Term >";
+                                                                                } elseif ($term == 2) {
+                                                                                    echo $term . "nd Term >";
+                                                                                } elseif ($term == 3) {
+                                                                                    echo $term . "rd Term >";
+                                                                                } else {
+                                                                                    echo "error";
+                                                                                }
+                                                                                ?>
+                                                                            </strong></a></li>
 
 
                                                                 <?php }
                                                             }
                                                             ?>
-                                                        </select>
+                                                        </ul>
                                                     </div>
-                                                    <div class="col-md-3">
+                                                    <div class="col-md-4">
                                                         <a href="edit-class-detail.php?editid=<?php echo htmlentities($row->id); ?>"
                                                             class="btn btn-primary btn-sm"><i class="icon-magnifier"></i></a>
                                                     </div>
@@ -235,7 +235,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
 
                                                         $sql = "SELECT * from tblsconducts,tblpunishments,tbladmin WHERE tblsconducts.id=tblpunishments.conductid AND tbladmin.ID=tblpunishments.userid AND tblsconducts.id=:conductid";
                                                         $query = $dbh->prepare($sql);
-                                                        $query->bindParam(':conductid' ,$conductid, PDO::PARAM_STR);
+                                                        $query->bindParam(':conductid', $conductid, PDO::PARAM_STR);
                                                         $query->execute();
                                                         $results = $query->fetchAll(PDO::FETCH_OBJ);
 
@@ -254,13 +254,13 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                                         <?php echo htmlentities($row->description); ?>
                                                                     </td>
                                                                     <td>
-                                                                        <?php echo "-".$row->marks . "Marks"; ?>
+                                                                        <?php echo "-" . $row->marks . "Marks"; ?>
                                                                     </td>
                                                                     <td>
-                                                                    <?php echo $row->AdminName. " role"; ?>                                                                       
+                                                                        <?php echo $row->AdminName . " role"; ?>
                                                                     </td>
                                                                     <td>
-                                                                    <?php echo $row->dates; ?>                                                                       
+                                                                        <?php echo $row->dates; ?>
                                                                     </td>
                                                                 </tr>
                                                                 <?php $cnt = $cnt + 1;
