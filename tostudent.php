@@ -129,8 +129,16 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                                 $totalmarks = $row->marks;
 
                                                             }
+                                                            $selectterm="SELECT term FROM tblterms, WHERE id=:showterm AND ";
+                                                            $run=$dbh->prepare($selectterm);
+                                                            $run->bindParam(":showterm", $term, PDO::PARAM_STR);
+                                                            $run->execute();
+                                                            $res= $run->fetchAll(PDO::FETCH_OBJ);
+                                                            foreach ($res as $resultterm) {
+                                                                $showterm=$resultterm->term;
+                                                            }
                                                             ?>
-                                                            <span class="report-title">Total Marks this term</span>
+                                                            <span class="report-title">Total Marks this term (<?php echo $showterm; ?>)</span>
                                                             <h4>
                                                                 <?php echo htmlentities($totalmarks); ?>
                                                             </h4>
