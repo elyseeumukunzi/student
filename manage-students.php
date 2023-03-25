@@ -239,13 +239,14 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                           <?php $cnt = $cnt + 1;
                         }
                       } elseif (!isset($_GET['level'])) {
-                        $sql = "SELECT tblstudent.ID,tblstudent.StudentName,tblstudent.DateofAdmission,tblstudent.StuID,tbllevels.levelname,tblclass.ClassName,tblsconducts.marks,tblclass.Section FROM tblstudent,tbllevels,tblclass,tblsconducts,tblyears,tblterms WHERE tblterms.yearid=tblyears.id AND tblsconducts.termid=tblterms.id AND tblstudent.StudentClass = tblclass.ID AND tblclass.LevelId = tbllevels.id AND tblsconducts.studentid = tblstudent.ID LIMIT $offset, $no_of_records_per_page";
+                        $sql = "SELECT tblstudent.ID,tblstudent.StudentName,tblstudent.DateofAdmission,tblstudent.StuID,tbllevels.levelname,tblclass.ClassName,tblsconducts.marks,tblclass.Section,tblterms.id FROM tblstudent,tbllevels,tblclass,tblsconducts,tblyears,tblterms WHERE tblterms.yearid=tblyears.id AND tblsconducts.termid=tblterms.id AND tblstudent.StudentClass = tblclass.ID AND tblclass.LevelId = tbllevels.id AND tblsconducts.studentid = tblstudent.ID LIMIT $offset, $no_of_records_per_page";
                         $query = $dbh->prepare($sql);
                         $query->execute();
                         $results = $query->fetchAll(PDO::FETCH_OBJ);
                         $cnt = 1;
                         if ($query->rowCount() > 0) {
-                          foreach ($results as $row) { ?>
+                          foreach ($results as $row) {
+                             ?>
                             <tr>
 
                               <td>
@@ -286,8 +287,8 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                               </td>
                                                           
                               <td>
-                                <!--remember to send the term id by default to sign conducts
-                                <a href="tostudent.php?studentid=<?php echo htmlentities($row->ID) ?>"
+                                <!--remember to send the term id by default to sign conducts-->
+                                <a href="tostudent.php?studentid=<?php echo htmlentities($row->ID) ?>&showterm=<?php echo $row->id; ?>"
                                   class="btn btn-primary btn-sm"><i class="icon-drawer"></i></a>
                                 <a href="edit-student-detail.php?editid=<?php echo htmlentities($row->ID); ?>"
                                   class="btn btn-primary btn-sm"><i class="icon-eye"></i></a>
