@@ -67,7 +67,7 @@ foreach($results as $row)
 {               ?>
         <div class="navbar-menu-wrapper d-flex align-items-center flex-grow-1">
           <h5 class="mb-0 font-weight-medium d-none d-lg-flex mx-auto"><?php  echo htmlentities($row->AdminName);?> Welcome to scms !</h5>
-          <div id="google_translate_element" class="ml-auto"></div>
+          <!-- <div id="google_translate_element" class="ml-auto"></div> -->
 
           <ul class="navbar-nav navbar-nav-right ml-auto">
             <li class="nav-item dropdown d-none d-xl-inline-flex user-dropdown">

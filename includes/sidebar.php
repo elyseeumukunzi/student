@@ -67,9 +67,8 @@
       </a>
       <?php 
       $thisyear=date('Y');
-       $sql = "SELECT id from tblyears WHERE year=:year";
+       $sql = "SELECT id from tblyears ORDER BY id ASC";
        $query = $dbh->prepare($sql);
-       $query->bindParam(':year', $thisyear, PDO::PARAM_STR);
        $query->execute();
        $results = $query->fetchAll(PDO::FETCH_OBJ);       
        if ($query->rowCount() > 0) {
@@ -78,14 +77,14 @@
 
          }}
          
-         $sql = "SELECT id from tblterms WHERE yearid=:year ";
+         $sql = "SELECT term from tblterms WHERE yearid=:year ";
          $query = $dbh->prepare($sql);
          $query->bindParam(':year', $year, PDO::PARAM_STR);
          $query->execute();
          $results = $query->fetchAll(PDO::FETCH_OBJ);       
          if ($query->rowCount() > 0) {
            foreach ($results as $row) { 
-            $term=$row->id;
+            $term=$row->term;
   
            }}
           ?>     
@@ -105,7 +104,7 @@
       <div class="collapse" id="ui-basic8">
         <ul class="nav flex-column sub-menu">
           <li class="nav-item"> <a class="nav-link" href="add-term.php">Add Term</a></li>
-          <li class="nav-item"> <a class="nav-link" href="manage-terms.php">Manage Terms</a></li>
+          <li class="nav-item"> <a class="nav-link" href="manage-terms.php?year=<?php echo $year; ?>">Go to Terms</a></li>
         </ul>
       </div>
     </li>

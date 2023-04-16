@@ -5,6 +5,7 @@ include('includes/dbconnection.php');
 if (strlen($_SESSION['sturecmsaid'] == 0)) {
     header('location:logout.php');
 } else {
+    $showterm = $_GET['showterm'];
 
     if (isset($_POST['punish'])) {
         $studentid = $_GET['studentid'];
@@ -17,10 +18,11 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
         if ($query->rowCount() > 0) {
             foreach ($results as $row) {
                 $year = $row->id;
-
             }
         }
-        $sql = "SELECT tblsconducts.marks,tblsconducts.id,tblterms.termid from tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.yearid=:year AND tblsconducts.studentid=:studentid";
+
+
+        $sql = "SELECT tblsconducts.marks,tblsconducts.id from tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.yearid=:year AND tblsconducts.studentid=:studentid";
         $query = $dbh->prepare($sql);
         $query->bindParam(':year', $year, PDO::PARAM_STR);
         $query->bindParam(':studentid', $studentid, PDO::PARAM_STR);
@@ -33,6 +35,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                 $termid = $row->termid;
             }
         }
+
         $fault = $_POST['fault'];
         $marks = $_POST['marks'];
         $newmarks = $row->marks - $marks;
@@ -52,13 +55,15 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
             $queryupdate = $dbh->prepare($update);
             $queryupdate->bindParam(':newmarks', $newmarks, PDO::PARAM_STR);
             $queryupdate->bindParam(':conductid', $conductid, PDO::PARAM_STR);
-
             $queryupdate->execute();
-            echo '<script>alert("Punishmen added")</script>';
-            echo "<script>window.location.href ='tostudent.php?studentid=$studentid'</script>";
+            $sh = $_GET['showterm'];
+
+            echo '<script>alert("Punishment added")</script>';
+            echo "<script>window.location.href ='tostudent.php?studentid=$studentid&showterm=$sh'</script>";
         } else {
             echo '<script>alert("Something Went Wrong. Please try again")</script>';
         }
+
     }
 
     ?>
@@ -79,6 +84,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                         <div class="d-sm-flex align-items-baseline report-summary-header">
                                             <?php
 
+
                                             if (isset($_GET['studentid'])) {
                                                 $studentid = $_GET['studentid'];
                                                 $sql = "SELECT * FROM tblstudent,tbllevels,tblclass WHERE tblstudent.StudentClass = tblclass.ID AND tblclass.LevelId = tbllevels.id  AND tblstudent.ID=:studentid";
@@ -90,13 +96,34 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                 if ($query->rowCount() > 0) {
                                                     foreach ($results as $row) {
                                                         ?>
-                                                        <h5 class="font-weight-semibold">
-                                                            <?php echo htmlentities($row->StudentName) ?>
+                                                        <h5 class="font-weight-semibold col-md-4">
+                                                            <?php echo htmlentities($row->StudentName) . "<br> " . $row->ClassName . "" . $row->Section . "(" . $row->levelname . ")"; ?>
                                                         </h5> <span class="ml-auto"></span>
-                                                        <ol class="breadcrumb">
-                                                            <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
-                                                            <li class="breadcrumb-item active" aria-current="page">To student</li>
-                                                        </ol>
+                                                        <div class="col-md-6">
+                                                            <?php
+                                                            $selectinfo = "SELECT * FROM tblterms,tblyears WHERE tblterms.yearid=tblyears.id AND tblterms.id = ?";
+                                                            $query = $dbh->prepare($selectinfo);
+                                                            $query->execute(array($showterm));
+                                                            $result = $query->fetchAll(PDO::FETCH_OBJ);
+                                                            foreach ($result as $row) {
+
+                                                                $term = $row->term;
+                                                                if ($term == 1) {
+                                                                    echo $term . "st Term";
+                                                                } elseif ($term == 2) {
+                                                                    echo $term . "nd Term";
+                                                                } elseif ($term == 3) {
+                                                                    echo $term . "rd Term";
+                                                                } else {
+                                                                    echo "error";
+                                                                }
+                                                                echo " " . $row->year;
+                                                            }
+
+                                                            ?>
+
+                                                        </div>
+
                                                     </div>
                                                 </div>
                                             </div>
@@ -121,7 +148,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                             $sql1 = "SELECT marks from tblsconducts WHERE studentid=:studentid AND termid=:termid";
                                                             $query1 = $dbh->prepare($sql1);
                                                             $query1->bindParam(':studentid', $studentid, PDO::PARAM_STR);
-                                                            $query1->bindParam(':termid', $termid, PDO::PARAM_STR);
+                                                            $query1->bindParam(':termid', $showterm, PDO::PARAM_STR);
                                                             $query1->execute();
                                                             $results1 = $query1->fetchAll(PDO::FETCH_OBJ);
                                                             $totalmarks = 0;
@@ -129,29 +156,29 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                                 $totalmarks = $row->marks;
 
                                                             }
-                                                            $sh=$_GET['showterm'];
-                                                            $selectterm="SELECT term FROM tblterms WHERE id=:showterm AND yearid=:year";
-                                                            $run=$dbh->prepare($selectterm);
-                                                            $run->bindParam(":showterm", $sh, PDO::PARAM_STR);
-                                                            $run->bindParam(":year", $year, PDO::PARAM_STR);
+                                                            $sh = $_GET['showterm'];
+                                                            $selectterm = "SELECT term FROM tblterms ORDER BY id asc";
+                                                            $run = $dbh->prepare($selectterm);
 
                                                             $run->execute();
-                                                            $res= $run->fetchAll(PDO::FETCH_OBJ);
+                                                            $res = $run->fetchAll(PDO::FETCH_OBJ);
                                                             foreach ($res as $resultterm) {
-                                                                $showterm=$resultterm->term;
+                                                                $showterm = $resultterm->term;
                                                             }
                                                             ?>
-                                                            <span class="report-title">Total Marks this term (<?php
-                                                                                if ($showterm == 1) {
-                                                                                    echo $showterm . "st Term >";
-                                                                                } elseif ($showterm == 2) {
-                                                                                    echo $showterm . "nd Term >";
-                                                                                } elseif ($showterm == 3) {
-                                                                                    echo $showterm . "rd Term >";
-                                                                                } else {
-                                                                                    echo "error";
-                                                                                }
-                                                                                ?>  ?>)</span>
+                                                            <span class="report-title"> Total Marks this term (
+                                                                <?php
+                                                                if ($term == 1) {
+                                                                    echo $term . "st Term ";
+                                                                } elseif ($term == 2) {
+                                                                    echo $term . "nd Term ";
+                                                                } elseif ($term == 3) {
+                                                                    echo $term . "rd Term ";
+                                                                } else {
+                                                                    echo "error";
+                                                                }
+                                                                ?> )
+                                                            </span>
                                                             <h4>
                                                                 <?php echo htmlentities($totalmarks); ?>
                                                             </h4>
@@ -179,8 +206,10 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                             <h4>
                                                                 <?php echo htmlentities($totstu); ?>
                                                             </h4>
-                                                            <a href="manage-students.php"><span class="report-count"> View
-                                                                    punishments</span></a>
+                                                            <a href="manage-students.php"><span class="report-count">
+                                                                    View
+                                                                    punishments</span>
+                                                            </a>
                                                         </div>
                                                         <div class="inner-card-icon ">
                                                             <i class="icon-minus"></i>
@@ -190,56 +219,21 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                 <br>
 
                                                 <div class="row" style="margin-top:20px">
-                                                    <div class="col-md-6">
-                                                        <label><b>Punishments this term</b></label>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <ul class="pagination">
-                                                            <?php
-                                                            $thisyear = date('Y');
-                                                            $sql = "SELECT tblterms.id,tblterms.term FROM tblterms,tblyears WHERE tblterms.yearid = tblyears.id AND tblyears.year =:thisyear ORDER BY tblterms.id ASC";
-                                                            $query = $dbh->prepare($sql);
-                                                            $query->bindParam(':thisyear', $thisyear, PDO::PARAM_STR);
-                                                            $query->execute();
-                                                            $results = $query->fetchAll(PDO::FETCH_OBJ);
-                                                            if ($query->rowCount() > 0) {
-                                                                foreach ($results as $row) {
-                                                                    ?>
-                                                                    <li><a href="tostudent.php?studentid=<?php echo $studentid; ?>&showterm=<?php echo $row->id; ?>"><strong>
-                                                                                <?php $term = htmlentities($row->term);
-                                                                                if ($term == 1) {
-                                                                                    echo $term . "st Term >";
-                                                                                } elseif ($term == 2) {
-                                                                                    echo $term . "nd Term >";
-                                                                                } elseif ($term == 3) {
-                                                                                    echo $term . "rd Term >";
-                                                                                } else {
-                                                                                    echo "error";
-                                                                                }
-                                                                                ?>
-                                                                            </strong></a></li>
-
-
-                                                                <?php }
-                                                            }
-                                                            ?>
-                                                        </ul>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <a href="edit-class-detail.php?editid=<?php echo htmlentities($row->id); ?>"
-                                                            class="btn btn-primary btn-sm"><i class="icon-magnifier"></i></a>
+                                                    <div class="col-md-12">
+                                                        <label><b>Punishments this term <i style="opacity:0.5">*Selected term</i>
+                                                            </b></label>
                                                     </div>
                                                 </div>
 
                                                 <table class="table">
                                                     <thead>
                                                         <tr>
-                                                            <th class="font-weight-bold">No</th>
-                                                            <th class="font-weight-bold">Mistake</th>
-                                                            <th class="font-weight-bold">Description</th>
-                                                            <th class="font-weight-bold">Punishments</th>
-                                                            <th class="font-weight-bold">Dean</th>
-                                                            <th class="font-weight-bold">Dates</th>
+                                                            <th class="font-weight-bold"></th>
+                                                            <th class="font-weight-bold"></th>
+                                                            <th class="font-weight-bold"></th>
+                                                            <th class="font-weight-bold"></th>
+                                                            <th class="font-weight-bold"></th>
+                                                            <th class="font-weight-bold"></th>
 
                                                         </tr>
                                                     </thead>
@@ -292,47 +286,55 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-8">
-                                                    <P><b>new punishment</b></P>
+                                                    <?php
+                                                    if ($totalmarks > 0) {
+                                                        ?>
 
-                                                    <form class="forms-sample" method="POST">
 
-                                                        <div class="form-group">
-                                                            <label for="exampleInputName1">Fault Name</label>
-                                                            <input type="text" name="fault" value="" class="form-control"
-                                                                required='true' placeholder="write mistake here">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="exampleInputEmail3">Punishment Marks</label>
-                                                            <input type="number" name="marks" value="" class="form-control"
-                                                                required='true' placeholder="removed conducts marks">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="exampleInputEmail3">Description</label>
-                                                            <div class="form-group col-md-12">
-                                                                <textarea name="description" class="form-control"></textarea>
+                                                        <P><b>new punishment <i style="opacity:0.5">*this term</i></b></P>
+
+                                                        <form class="forms-sample" method="POST">
+
+                                                            <div class="form-group">
+                                                                <label for="exampleInputName1">Fault Name</label>
+                                                                <input type="text" name="fault" value="" class="form-control"
+                                                                    required='true' placeholder="write mistake here">
                                                             </div>
-                                                        </div>
-                                                        <button type="submit" class="btn btn-primary mr-2" name="punish">Save</button>
+                                                            <div class="form-group">
+                                                                <label for="exampleInputEmail3">Punishment Marks</label>
+                                                                <input type="number" name="marks" value="" class="form-control"
+                                                                    required='true' placeholder="removed conducts marks">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="exampleInputEmail3">Description</label>
+                                                                <div class="form-group col-md-12">
+                                                                    <textarea name="description" class="form-control"></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <button type="submit" class="btn btn-primary mr-2" name="punish">Save</button>
 
-                                                    </form>
-                                                </div>
+                                                        </form>
+                                                    </div>
+                                                <?php }
+                                                    ?>
                                                 <div class="col-md-4 card">
                                                     <div class="report-inner-cards-wrapper">
                                                         <div class="report-inner-card color-2">
                                                             <div class="inner-card-text text-white">
-                                                                <?php
-                                                                $sql2 = "SELECT * from  tblstudent";
-                                                                $query2 = $dbh->prepare($sql2);
-                                                                $query2->execute();
-                                                                $results2 = $query2->fetchAll(PDO::FETCH_OBJ);
-                                                                $totstu = $query2->rowCount();
-                                                                ?>
-                                                                <span class="report-title">Common mistakes</span>
-                                                                <h4>
-                                                                    <?php echo htmlentities($totstu); ?>
-                                                                </h4>
-                                                                <a href="manage-students.php"><span class="report-count"> View
-                                                                        punishments</span></a>
+
+                                                                <span class=" report-title">Common mistakes for all</span>
+
+                                                                <ul>
+                                                                    <li>Misconducts</li>
+                                                                    <li>Disobayance</li>
+                                                                    <li>Disturbing in class</li>
+                                                                    <li>Refectory misconducts</li>
+
+
+
+                                                                </ul>
+
+
                                                             </div>
                                                             <div class="inner-card-icon ">
                                                             </div>

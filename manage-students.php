@@ -61,9 +61,8 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                           <?php
 
                           $thisyear = date('Y');
-                          $sql = "SELECT * FROM tblyears WHERE year=:thisyear";
+                          $sql = "SELECT * FROM tblyears";
                           $query = $dbh->prepare($sql);
-                          $query->bindParam(':thisyear', $thisyear, PDO::PARAM_STR);
                           $query->execute();
                           $results = $query->fetchAll(PDO::FETCH_OBJ);
                           if ($query->rowCount() > 0) {
@@ -142,7 +141,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                   </div>
                   </form>
 
-                  <a href="manage-students.php" class="text-dark ml-auto mb-3 mb-sm-0"> View all Students</a>
+                  <!-- <a href="manage-students.php" class="text-dark ml-auto mb-3 mb-sm-0"> View all Students</a> -->
                 </div>
                 <div class="table-responsive border rounded p-1">
                   <table class="table">

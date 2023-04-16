@@ -165,11 +165,11 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                     <input type="file" name="image" value="" class="form-control" required='true'>
                   </div>
                   <div class="form-group col-md-6">
-                    <label for="exampleInputName1">Admittion term</label>
+                    <label for="exampleInputName1">Admittion term <i>* this year</i></label>
                     <select name="term" value="" class="form-control" required='true'>
                       <?php
                       $thisyear = date('Y');
-                      $sql = "SELECT tblterms.id,tblterms.term FROM tblterms,tblyears WHERE tblterms.yearid = tblyears.id AND tblyears.year =:thisyear ORDER BY tblterms.id DESC";
+                      $sql = "SELECT tblterms.id,tblterms.term,tblyears.year FROM tblterms,tblyears WHERE tblterms.yearid = tblyears.id AND tblyears.year =:thisyear ORDER BY tblterms.id DESC";
                       $query = $dbh->prepare($sql);
                       $query->bindParam(':thisyear', $thisyear, PDO::PARAM_STR);
                       $query->execute();
@@ -180,13 +180,13 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                           <option value="<?php echo $row->id ?>"> 
                           <?php $term = htmlentities($row->term);
                              if ($term == 1) {
-                               echo $term . "st Term";
+                               echo $row->year." ". $term . "st Term";
                              }
                              elseif ($term == 2) {
-                               echo $term . "nd Term";
+                              echo $row->year." ".$term . "nd Term";
                              }
                              elseif ($term == 3) {
-                               echo $term . "rd Term";
+                              echo $row->year." ".$term . "rd Term";
                              }
                              else
                              {
