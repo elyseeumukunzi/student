@@ -9,36 +9,36 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
 
     if (isset($_POST['punish'])) {
         $studentid = $_GET['studentid'];
-        $thisyear = date('Y');
         $sql = "SELECT id from tblyears WHERE year=:year";
         $query = $dbh->prepare($sql);
-        $query->bindParam(':year', $thisyear, PDO::PARAM_STR);
+        $query->bindParam(':year', $year, PDO::PARAM_STR);
         $query->execute();
         $results = $query->fetchAll(PDO::FETCH_OBJ);
         if ($query->rowCount() > 0) {
             foreach ($results as $row) {
-                $year = $row->id;
+                $yearid = $row->id;
             }
         }
 
 
-        $sql = "SELECT tblsconducts.marks,tblsconducts.id from tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.yearid=:year AND tblsconducts.studentid=:studentid";
+        $sql = "SELECT tblsconducts.marks,tblsconducts.id,tblsconducts.termid from tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.yearid=:year AND tblsconducts.studentid=:studentid";
         $query = $dbh->prepare($sql);
-        $query->bindParam(':year', $year, PDO::PARAM_STR);
+        $query->bindParam(':year', $yearid, PDO::PARAM_STR);
         $query->bindParam(':studentid', $studentid, PDO::PARAM_STR);
 
         $query->execute();
         $results = $query->fetchAll(PDO::FETCH_OBJ);
         if ($query->rowCount() > 0) {
             foreach ($results as $row) {
-                $conductid = $row->id;
+                $conductidd = $row->id;
                 $termid = $row->termid;
+                $currentmarks=$row->marks;
             }
         }
 
         $fault = $_POST['fault'];
         $marks = $_POST['marks'];
-        $newmarks = $row->marks - $marks;
+        $newmarks = $currentmarks - $marks;
         $description = $_POST['description'];
         $userid = $_SESSION['sturecmsaid'];
         $sql = "insert into tblpunishments(fault,description,marks,conductid,userid)values(:fault,:description,:marks,:conductid,:userid)";
@@ -106,7 +106,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                             $query->execute(array($showterm));
                                                             $result = $query->fetchAll(PDO::FETCH_OBJ);
                                                             foreach ($result as $row) {
-
+                                                                $year=$row->year;
                                                                 $term = $row->term;
                                                                 if ($term == 1) {
                                                                     echo $term . "st Term";
@@ -118,6 +118,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                                     echo "error";
                                                                 }
                                                                 echo " " . $row->year;
+
                                                             }
 
                                                             ?>
@@ -133,9 +134,9 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                         <div class="inner-card-text text-white">
                                                             <?php
                                                             //selecting total student marks in his term
-                                                            $sql = "SELECT tblsconducts.marks,tblsconducts.id,tblsconducts.termid FROM tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.yearid=:year AND tblsconducts.studentid=:studentid";
+                                                            $sql = "SELECT tblsconducts.marks,tblsconducts.id,tblsconducts.termid FROM tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.id=:term AND tblsconducts.studentid=:studentid";
                                                             $query = $dbh->prepare($sql);
-                                                            $query->bindParam(':year', $year, PDO::PARAM_STR);
+                                                            $query->bindParam(':term', $showterm, PDO::PARAM_STR);
                                                             $query->bindParam(':studentid', $studentid, PDO::PARAM_STR);
                                                             $query->execute();
                                                             $results = $query->fetchAll(PDO::FETCH_OBJ);
@@ -311,7 +312,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                                     <textarea name="description" class="form-control"></textarea>
                                                                 </div>
                                                             </div>
-                                                            <button type="submit" class="btn btn-primary mr-2" name="punish">Save</button>
+                                                            <button type="submit" class="btn btn-primary mr-2" name="punish">Save <?php echo $conductid; ?></button>
 
                                                         </form>
                                                     </div>
