@@ -18,7 +18,28 @@ $query->execute();
 
 
 }
-?>
+    $aid = $_SESSION['sturecmsaid'];
+    $sql = "SELECT * from tbladmin where ID=:aid";
+
+    $query = $dbh->prepare($sql);
+    $query->bindParam(':aid', $aid, PDO::PARAM_STR);
+    $query->execute();
+    $results = $query->fetchAll(PDO::FETCH_OBJ);
+
+    $cnt = 1;
+    if ($query->rowCount() > 0) {
+      foreach ($results as $row) {
+        $role = $row->Role;
+      }
+    }
+    if ($role == 'Dean') {
+      $visibility="";
+    }
+    else
+    {
+      $visibility="hidden";
+        }
+      ?>
 
       <!-- partial:partials/_navbar.html -->
      <?php include_once('includes/header.php');?>
@@ -93,7 +114,7 @@ foreach($results as $row)
                             <td><?php  echo htmlentities($row->levelname);?></td>
                             <td><?php  echo htmlentities($row->CreationDate);?></td>
                             <td>
-                              <a href="edit-class-detail.php?editid=<?php echo htmlentities ($row->ID);?>" class="btn btn-primary btn-sm"><i class="icon-eye"></i></a>
+                              <a href="edit-class-detail.php?editid=<?php echo htmlentities ($row->ID);?>" class="btn btn-primary btn-sm" <?php echo $visibility;  ?>><i class="icon-eye"></i></a>
                                                <a href="manage-class.php?delid=<?php echo ($row->ID);?>" onclick="return confirm('Do you really want to Delete ?');" class="btn btn-danger btn-sm"> <i class="icon-trash"></i></a>
                             </td> 
                           </tr><?php $cnt=$cnt+1;}} ?>

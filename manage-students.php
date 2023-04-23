@@ -17,6 +17,30 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
 
 
   }
+  $aid = $_SESSION['sturecmsaid'];
+  $sql = "SELECT * from tbladmin where ID=:aid";
+
+  $query = $dbh->prepare($sql);
+  $query->bindParam(':aid', $aid, PDO::PARAM_STR);
+  $query->execute();
+  $results = $query->fetchAll(PDO::FETCH_OBJ);
+
+  $cnt = 1;
+  if ($query->rowCount() > 0) {
+    foreach ($results as $row) {
+      $role = $row->Role;
+    }
+  }
+  if ($role == 'Dean') {
+    $visibility="";
+    $visibility2="hidden";
+  }
+  else
+  {
+    $visibility="hidden";
+    $visibility2="";
+      }
+
 
   ?><!--  Orginal Author Name: Mayuri.K. 
  for any PHP, Codeignitor, Laravel OR Python work contact me at mdkhairnar92@gmail.com  
@@ -226,12 +250,12 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                             } ?>
                             </td>
                             <td>
-                              <a href="tostudent.php?studentid=<?php echo htmlentities($row->ID) ?>&showterm=<?php echo $row->id; ?>"
+                              <a href="tostudent.php?studentid=<?php echo htmlentities($row->ID) ?>&showterm=<?php echo $row->id; ?>&thisterm=<?php  echo $term; ?>"
                                 class="btn btn-primary btn-sm"><i class="icon-drawer"></i></a>
                               <a href="edit-student-detail.php?editid=<?php echo htmlentities($row->ID); ?>"
                                 class="btn btn-primary btn-sm"><i class="icon-eye"></i></a>
                               <a href="manage-students.php?delid=<?php echo ($row->ID); ?>"
-                                onclick="return confirm('Do you really want to Delete ?');" class="btn btn-danger btn-sm">
+                                onclick="return confirm('Do you really want to Delete ?');" class="btn btn-danger btn-sm"  <?php echo $visibility; ?>>
                                 <i class="icon-trash"></i></a>
                             </td>
                           </tr>
@@ -290,9 +314,9 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                 <a href="tostudent.php?studentid=<?php echo htmlentities($row->ID) ?>&showterm=<?php echo $row->id; ?>"
                                   class="btn btn-primary btn-sm"><i class="icon-drawer"></i></a>
                                 <a href="edit-student-detail.php?editid=<?php echo htmlentities($row->ID); ?>"
-                                  class="btn btn-primary btn-sm"><i class="icon-eye"></i></a>
+                                  class="btn btn-primary btn-sm" ><i class="icon-eye"></i></a>
                                 <a href="manage-students.php?delid=<?php echo ($row->ID); ?>"
-                                  onclick="return confirm('Do you really want to Delete ?');" class="btn btn-danger btn-sm">
+                                  onclick="return confirm('Do you really want to Delete ?');" class="btn btn-danger btn-sm" <?php echo $visibility; ?>>
                                   <i class="icon-trash"></i></a>
                               </td>
                             </tr>

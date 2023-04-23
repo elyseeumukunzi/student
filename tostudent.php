@@ -9,35 +9,27 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
 
     if (isset($_POST['punish'])) {
         $studentid = $_GET['studentid'];
-        $sql = "SELECT id from tblyears WHERE year=:year";
+        $thisterm=$_GET['thisterm'];
+
+        $sql = "SELECT tblsconducts.marks,tblsconducts.id,tblsconducts.termid from tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.id=? AND tblsconducts.studentid = ?";
         $query = $dbh->prepare($sql);
-        $query->bindParam(':year', $year, PDO::PARAM_STR);
-        $query->execute();
-        $results = $query->fetchAll(PDO::FETCH_OBJ);
+        $query->execute(array($thisterm,$studentid));
+        $resul = $query->fetchAll(PDO::FETCH_OBJ);
         if ($query->rowCount() > 0) {
-            foreach ($results as $row) {
-                $yearid = $row->id;
-            }
-        }
-
-
-        $sql = "SELECT tblsconducts.marks,tblsconducts.id,tblsconducts.termid from tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.yearid=:year AND tblsconducts.studentid=:studentid";
-        $query = $dbh->prepare($sql);
-        $query->bindParam(':year', $yearid, PDO::PARAM_STR);
-        $query->bindParam(':studentid', $studentid, PDO::PARAM_STR);
-
-        $query->execute();
-        $results = $query->fetchAll(PDO::FETCH_OBJ);
-        if ($query->rowCount() > 0) {
-            foreach ($results as $row) {
-                $conductidd = $row->id;
+            foreach ($resul as $row) {
+                $conductid = $row->id;
                 $termid = $row->termid;
-                $currentmarks=$row->marks;
-            }
-        }
-
+                $currentmarks = $row->marks;
+            }}
+          
         $fault = $_POST['fault'];
         $marks = $_POST['marks'];
+         if($marks > $currentmarks)
+         {
+            // echo '<script>alert("removed marks were not expected")</script>';
+         }        
+         else{
+
         $newmarks = $currentmarks - $marks;
         $description = $_POST['description'];
         $userid = $_SESSION['sturecmsaid'];
@@ -63,6 +55,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
         } else {
             echo '<script>alert("Something Went Wrong. Please try again")</script>';
         }
+    }
 
     }
 
@@ -106,7 +99,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                             $query->execute(array($showterm));
                                                             $result = $query->fetchAll(PDO::FETCH_OBJ);
                                                             foreach ($result as $row) {
-                                                                $year=$row->year;
+                                                                $year = $row->year;
                                                                 $term = $row->term;
                                                                 if ($term == 1) {
                                                                     echo $term . "st Term";
@@ -134,7 +127,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                         <div class="inner-card-text text-white">
                                                             <?php
                                                             //selecting total student marks in his term
-                                                            $sql = "SELECT tblsconducts.marks,tblsconducts.id,tblsconducts.termid FROM tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.id=:term AND tblsconducts.studentid=:studentid";
+                                                            $sql = "SELECT tblsconducts.marks,tblsconducts.id,tblsconducts.termid FROM tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.id=:term AND tblsconducts.studentid=:studentid"; 
                                                             $query = $dbh->prepare($sql);
                                                             $query->bindParam(':term', $showterm, PDO::PARAM_STR);
                                                             $query->bindParam(':studentid', $studentid, PDO::PARAM_STR);
@@ -288,7 +281,17 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                             <div class="row">
                                                 <div class="col-md-8">
                                                     <?php
+                                                    $thisterm = "SELECT id FROM tblterms ORDER BY id ASC";
+                                                    $query = $dbh->prepare($thisterm);
+                                                    $query->execute();
+                                                    $results = $query->fetchAll(PDO::FETCH_OBJ);
+                                                    foreach ($results as $row) {
+                                                        $lastterm=$row->id;
+                                                    }
+
                                                     if ($totalmarks > 0) {
+                                                        if($lastterm = $showterm)
+                                                        {
                                                         ?>
 
 
@@ -312,18 +315,28 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                                     <textarea name="description" class="form-control"></textarea>
                                                                 </div>
                                                             </div>
-                                                            <button type="submit" class="btn btn-primary mr-2" name="punish">Save <?php echo $conductid; ?></button>
+                                                            <button type="submit" class="btn btn-primary mr-2" name="punish">Save
+                                                                <?php echo $conductid; ?>
+                                                            </button>
 
                                                         </form>
                                                     </div>
-                                                <?php }
+                                                <?php 
+                                                        }
+                                                else
+                                                {
+                                                    echo "<h4>Can't sign to the previous term";
+
+                                                }
+                                            }
+                                                
                                                     ?>
                                                 <div class="col-md-4 card">
                                                     <div class="report-inner-cards-wrapper">
                                                         <div class="report-inner-card color-2">
                                                             <div class="inner-card-text text-white">
 
-                                                                <span class=" report-title">Common mistakes for all</span>
+                                                                <span class=" report-title">Common mistakes for all <?php echo $lastterm; ?></span>
 
                                                                 <ul>
                                                                     <li>Misconducts</li>

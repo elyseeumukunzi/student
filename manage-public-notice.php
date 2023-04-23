@@ -52,6 +52,7 @@ $query->execute();
                           <tr>
                             <th class="font-weight-bold">S.No</th>
                             <th class="font-weight-bold">Notice Title</th>
+                            <th class="font-weight-bold">For user</th>
                             <th class="font-weight-bold">Notice Date</th>
                             <th class="font-weight-bold">Action</th>
                             
@@ -87,6 +88,7 @@ foreach($results as $row)
                            
                             <td><?php echo htmlentities($cnt);?></td>
                             <td><?php  echo htmlentities($row->NoticeTitle);?></td>
+                            <td><?php  echo htmlentities($row->Foruser);?></td>
                             <td><?php  echo htmlentities($row->CreationDate);?></td>
                             <td>
                               <a href="edit-public-notice-detail.php?editid=<?php echo htmlentities ($row->ID);?>" class="btn btn-primary btn-sm"><i class="icon-eye"></i></a>

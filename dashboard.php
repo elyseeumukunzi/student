@@ -40,6 +40,30 @@ $query1 = $dbh -> prepare($sql1);
 $query1->execute();
 $results1=$query1->fetchAll(PDO::FETCH_OBJ);
 $totclass=$query1->rowCount();
+
+$thisyear = date('Y');
+$sql = "SELECT id from tblyears ORDER BY id ASC";
+$query = $dbh->prepare($sql);
+$query->execute();
+$results = $query->fetchAll(PDO::FETCH_OBJ);
+if ($query->rowCount() > 0) {
+  foreach ($results as $row) {
+    $year = $row->id;
+
+  }
+}
+
+$sql = "SELECT term from tblterms WHERE yearid=:year ";
+$query = $dbh->prepare($sql);
+$query->bindParam(':year', $year, PDO::PARAM_STR);
+$query->execute();
+$results = $query->fetchAll(PDO::FETCH_OBJ);
+if ($query->rowCount() > 0) {
+  foreach ($results as $row) {
+    $term = $row->term;
+
+  }
+}
 ?>
                           <span class="report-title">Total Class</span>
                           <h4><?php echo htmlentities($totclass);?></h4>
@@ -62,7 +86,7 @@ $totstu=$query2->rowCount();
 ?>
                           <span class="report-title">Total Students</span>
                           <h4><?php echo htmlentities($totstu);?></h4>
-                          <a href="manage-students.php"><span class="report-count"> View Students</span></a>
+                          <a href="manage-students.php?year=<?php echo $year; ?>&term=<?php echo $term; ?>&level=1"><span class="report-count"> View Students</span></a>
                         </div>
                         <div class="inner-card-icon ">
                           <i class="icon-user"></i>
