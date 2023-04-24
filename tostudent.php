@@ -6,56 +6,77 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
     header('location:logout.php');
 } else {
     $showterm = $_GET['showterm'];
+    $studentid = $_GET['studentid'];
+    $thisyear = date('Y');
+    $sql = "SELECT id from tblyears ORDER BY id ASC";
+    $query = $dbh->prepare($sql);
+    $query->execute();
+    $results = $query->fetchAll(PDO::FETCH_OBJ);
+    if ($query->rowCount() > 0) {
+      foreach ($results as $row) {
+        $year = $row->id;
 
-    if (isset($_POST['punish'])) {
-        $studentid = $_GET['studentid'];
-        $thisterm=$_GET['thisterm'];
+      }
+    }
 
-        $sql = "SELECT tblsconducts.marks,tblsconducts.id,tblsconducts.termid from tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.id=? AND tblsconducts.studentid = ?";
-        $query = $dbh->prepare($sql);
-        $query->execute(array($thisterm,$studentid));
-        $resul = $query->fetchAll(PDO::FETCH_OBJ);
-        if ($query->rowCount() > 0) {
-            foreach ($resul as $row) {
-                $conductid = $row->id;
-                $termid = $row->termid;
-                $currentmarks = $row->marks;
-            }}
-          
-        $fault = $_POST['fault'];
-        $marks = $_POST['marks'];
-         if($marks > $currentmarks)
-         {
-            // echo '<script>alert("removed marks were not expected")</script>';
-         }        
-         else{
+    $sql = "SELECT id from tblterms WHERE yearid=:year ";
+    $query = $dbh->prepare($sql);
+    $query->bindParam(':year', $year, PDO::PARAM_STR);
+    $query->execute();
+    $results = $query->fetchAll(PDO::FETCH_OBJ);
+    if ($query->rowCount() > 0) {
+      foreach ($results as $row) {
+        $thisterm = $row->id;
 
-        $newmarks = $currentmarks - $marks;
-        $description = $_POST['description'];
-        $userid = $_SESSION['sturecmsaid'];
-        $sql = "insert into tblpunishments(fault,description,marks,conductid,userid)values(:fault,:description,:marks,:conductid,:userid)";
-        $query = $dbh->prepare($sql);
-        $query->bindParam(':fault', $fault, PDO::PARAM_STR);
-        $query->bindParam(':description', $description, PDO::PARAM_STR);
-        $query->bindParam(':marks', $marks, PDO::PARAM_STR);
-        $query->bindParam(':conductid', $conductid, PDO::PARAM_STR);
-        $query->bindParam(':userid', $userid, PDO::PARAM_STR);
-        $query->execute();
-        $LastInsertId = $dbh->lastInsertId();
-        if ($LastInsertId > 0) {
-            $update = "UPDATE tblsconducts SET marks=:newmarks WHERE id=:conductid";
-            $queryupdate = $dbh->prepare($update);
-            $queryupdate->bindParam(':newmarks', $newmarks, PDO::PARAM_STR);
-            $queryupdate->bindParam(':conductid', $conductid, PDO::PARAM_STR);
-            $queryupdate->execute();
-            $sh = $_GET['showterm'];
-
-            echo '<script>alert("Punishment added")</script>';
-            echo "<script>window.location.href ='tostudent.php?studentid=$studentid&showterm=$sh'</script>";
-        } else {
-            echo '<script>alert("Something Went Wrong. Please try again")</script>';
+      }
+    }
+    $sql = "SELECT * FROM tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.id=:term AND tblsconducts.studentid=:studentid";
+    $query = $dbh->prepare($sql);
+    $query->bindParam(':term', $thisterm, PDO::PARAM_STR);
+    $query->bindParam(':studentid', $studentid, PDO::PARAM_STR);
+    $query->execute();
+    $results = $query->fetchAll(PDO::FETCH_OBJ);
+    if ($query->rowCount() > 0) {
+        foreach ($results as $row) {
+            $conductid = $row->id;
+            $termid = $row->termid;
+            $currentmarks=$row->marks;
         }
     }
+    if (isset($_POST['punish'])) {
+       
+        $fault = $_POST['fault'];
+        $marks = $_POST['marks'];
+        if ($marks > $currentmarks) {
+            echo '<script>alert("removed marks were not expected")</script>';
+        } else {
+
+            $newmarks = $currentmarks - $marks;
+            $description = $_POST['description'];
+            $userid = $_SESSION['sturecmsaid'];
+            $sql = "insert into tblpunishments(fault,description,marks,conductid,userid)values(:fault,:description,:marks,:conductid,:userid)";
+            $query = $dbh->prepare($sql);
+            $query->bindParam(':fault', $fault, PDO::PARAM_STR);
+            $query->bindParam(':description', $description, PDO::PARAM_STR);
+            $query->bindParam(':marks', $marks, PDO::PARAM_STR);
+            $query->bindParam(':conductid', $conductid, PDO::PARAM_STR);
+            $query->bindParam(':userid', $userid, PDO::PARAM_STR);
+            $query->execute();
+            $LastInsertId = $dbh->lastInsertId();
+            if ($LastInsertId > 0) {
+                $update = "UPDATE tblsconducts SET marks=:newmarks WHERE id=:conductid";
+                $queryupdate = $dbh->prepare($update);
+                $queryupdate->bindParam(':newmarks', $newmarks, PDO::PARAM_STR);
+                $queryupdate->bindParam(':conductid', $conductid, PDO::PARAM_STR);
+                $queryupdate->execute();
+                $sh = $_GET['showterm'];
+
+                echo '<script>alert("Punishment added")</script>';
+                echo "<script>window.location.href ='tostudent.php?studentid=$studentid&showterm=$sh'</script>";
+            } else {
+                echo '<script>alert("Something Went Wrong. Please try again")</script>';
+            }
+        }
 
     }
 
@@ -127,7 +148,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                         <div class="inner-card-text text-white">
                                                             <?php
                                                             //selecting total student marks in his term
-                                                            $sql = "SELECT tblsconducts.marks,tblsconducts.id,tblsconducts.termid FROM tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.id=:term AND tblsconducts.studentid=:studentid"; 
+                                                            $sql = "SELECT tblsconducts.marks,tblsconducts.id,tblsconducts.termid FROM tblterms,tblsconducts WHERE tblterms.id=tblsconducts.termid AND tblterms.id=:term AND tblsconducts.studentid=:studentid";
                                                             $query = $dbh->prepare($sql);
                                                             $query->bindParam(':term', $showterm, PDO::PARAM_STR);
                                                             $query->bindParam(':studentid', $studentid, PDO::PARAM_STR);
@@ -266,7 +287,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                                                         <?php echo "-" . $row->marks . "Marks"; ?>
                                                                     </td>
                                                                     <td>
-                                                                        <?php echo $row->AdminName . " role"; ?>
+                                                                        <?php echo $row->AdminName . " (".$row->Role. ")"; ?>
                                                                     </td>
                                                                     <td>
                                                                         <?php echo $row->dates; ?>
@@ -281,62 +302,51 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                                             <div class="row">
                                                 <div class="col-md-8">
                                                     <?php
-                                                    $thisterm = "SELECT id FROM tblterms ORDER BY id ASC";
-                                                    $query = $dbh->prepare($thisterm);
-                                                    $query->execute();
-                                                    $results = $query->fetchAll(PDO::FETCH_OBJ);
-                                                    foreach ($results as $row) {
-                                                        $lastterm=$row->id;
+                                                    if ($totalmarks > 0) {
+                                                        if ($_GET['showterm'] == 5) {
+                                                            ?>
+                                                            <P><b>new punishment <i style="opacity:0.5">*this term</i></b></P>
+
+                                                            <form class="forms-sample" method="POST">
+
+                                                                <div class="form-group">
+                                                                    <label for="exampleInputName1">Fault Name</label>
+                                                                    <input type="text" name="fault" value="" class="form-control"
+                                                                        required='true' placeholder="write mistake here">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="exampleInputEmail3">Punishment Marks</label>
+                                                                    <input type="number" name="marks" value="" class="form-control"
+                                                                        required='true' placeholder="removed conducts marks">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="exampleInputEmail3">Description</label>
+                                                                    <div class="form-group col-md-12">
+                                                                        <textarea name="description" class="form-control"></textarea>
+                                                                    </div>
+                                                                </div>
+                                                                <button type="submit" class="btn btn-primary mr-2" name="punish">Save
+                                                                    <?php echo $currentmarks; ?>
+                                                                </button>
+
+                                                            </form>
+                                                        </div>
+                                                    <?php
+                                                        } else {
+                                                            echo "<h4>Can't sign to the previous term";
+
+                                                        }
                                                     }
 
-                                                    if ($totalmarks > 0) {
-                                                        if($lastterm = $showterm)
-                                                        {
-                                                        ?>
-
-
-                                                        <P><b>new punishment <i style="opacity:0.5">*this term</i></b></P>
-
-                                                        <form class="forms-sample" method="POST">
-
-                                                            <div class="form-group">
-                                                                <label for="exampleInputName1">Fault Name</label>
-                                                                <input type="text" name="fault" value="" class="form-control"
-                                                                    required='true' placeholder="write mistake here">
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label for="exampleInputEmail3">Punishment Marks</label>
-                                                                <input type="number" name="marks" value="" class="form-control"
-                                                                    required='true' placeholder="removed conducts marks">
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label for="exampleInputEmail3">Description</label>
-                                                                <div class="form-group col-md-12">
-                                                                    <textarea name="description" class="form-control"></textarea>
-                                                                </div>
-                                                            </div>
-                                                            <button type="submit" class="btn btn-primary mr-2" name="punish">Save
-                                                                <?php echo $conductid; ?>
-                                                            </button>
-
-                                                        </form>
-                                                    </div>
-                                                <?php 
-                                                        }
-                                                else
-                                                {
-                                                    echo "<h4>Can't sign to the previous term";
-
-                                                }
-                                            }
-                                                
                                                     ?>
                                                 <div class="col-md-4 card">
                                                     <div class="report-inner-cards-wrapper">
                                                         <div class="report-inner-card color-2">
                                                             <div class="inner-card-text text-white">
 
-                                                                <span class=" report-title">Common mistakes for all <?php echo $lastterm; ?></span>
+                                                                <span class=" report-title">Common mistakes for all
+                                                                
+                                                                </span>
 
                                                                 <ul>
                                                                     <li>Misconducts</li>

@@ -250,7 +250,7 @@ if (strlen($_SESSION['sturecmsaid'] == 0)) {
                             } ?>
                             </td>
                             <td>
-                              <a href="tostudent.php?studentid=<?php echo htmlentities($row->ID) ?>&showterm=<?php echo $row->id; ?>&thisterm=<?php  echo $term; ?>"
+                              <a href="tostudent.php?studentid=<?php echo htmlentities($row->ID) ?>&showterm=<?php echo $row->id; ?>"
                                 class="btn btn-primary btn-sm"><i class="icon-drawer"></i></a>
                               <a href="edit-student-detail.php?editid=<?php echo htmlentities($row->ID); ?>"
                                 class="btn btn-primary btn-sm"><i class="icon-eye"></i></a>
